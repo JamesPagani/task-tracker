@@ -1,15 +1,26 @@
 #!/usr/bin/env node
 "use strict"
 
-import path, { dirname } from 'node:path';
 import {argv} from 'node:process';
-import * as fs from 'node:fs/promises'
+import {readFileSync, writeFileSync} from 'node:fs'
 
+// CONSTANTS
 const jsonPath = new URL('./task-tracker.json', import.meta.url);
-async function main() {
-    let fileContents = JSON.parse(await fs.readFile(jsonPath, {
+
+function runCMD() {
+
+}
+
+function main() {
+    let fileContents = JSON.parse(readFileSync(jsonPath, {
         encoding: 'utf-8',
         flag: "a+",
     }));
+    console.log(fileContents)
+    let newContents = '{"hotel": "trivago"}'
+    // RUN COMMAND HERE
+    writeFileSync(jsonPath, newContents, {
+        encoding: "utf-8"
+    })
 }
 main();
