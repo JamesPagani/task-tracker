@@ -21,7 +21,12 @@ function addTask(tasks, description) {
     }
 
     const taskDate = new Date();
-    const newId = randomUUID().split("-")[0];
+    let newId = randomUUID().split("-")[0];
+
+    // Just in off-chance the ID is already in use...
+    while (tasks[newId]) {
+        newId = randomUUID().split("-")[0];
+    }
 
     tasks[newId] = {
         id: newId,
@@ -32,23 +37,89 @@ function addTask(tasks, description) {
     }
 }
 
-
+/**
+ * Update a task with a new description
+ * @param {object} tasks The list of tasks
+ * @param {string} id The ID of the task to update
+ * @param {string} description The new description of the task
+ */
 function updateTask(tasks, id, description) {
+    if (!id) {
+        throw Error(`You need to provide the ID of the task to update.
+            Usage: ${argv[1]} update <id> <description>`);
+    }
+    if (!description) {
+        throw Error(`You need to provide another short description when updating a task.
+            Usage: ${argv[1]} update <id> <description>`);
+    }
 
+    const task = tasks[id];
+
+    if (!task) {
+        throw Error(`Task ${id} was not found.`);
+    }
+
+    const updateDate = new Date();
+    task.description = description;
+    task.updatedAt = updateDate;
 }
 
+/**
+ * Delete a task from the list
+ * @param {object} tasks The list of tasks
+ * @param {string} id The ID of the task to delete
+ */
 function deleteTask(tasks, id) {
+    if (!id) {
+        throw Error(`You need to provide the ID of the task to delete.
+            Usage: ${argv[1]} delete <id>`);
+    }
 
+    if (!tasks[id]) {
+        throw Error(`Task ${id} was not found.`);
+    }
+    
+    delete tasks[id];
 }
 
-function markTask(tasks, newStatus) {
+/**
+ * Update the status of a task
+ * @param {object} tasks The list of tasks
+ * @param {string} id The ID of the task to update its status
+ * @param {string} newStatus The new status of the task (todo, in-progress, or done)
+ */
+function markTask(tasks, id, newStatus) {
+    if (!id) {
+        throw Error(`You need the ID of the task to update its status
+            Usage: ${argv[1]} mark-${newStatus} <id>`);
+    }
 
+    const task = tasks[id];
+    if (!task) {
+        throw Error(`Task ${id} was not found.`);
+    }
+
+    const updateDate = new Date();
+    task.status = newStatus;
+    task.updatedAt = updateDate;
 }
 
+/**
+ * 
+ * @param {object} tasks The list of tasks
+ * @param {string} status If specified, show all tasks with this status
+ */
 function listTasks(tasks, status) {
-
+    for (let task of Object.values(tasks)) {
+        console.log(
+            `${task.id}: ${task.description} [${task.status}]\n[C: ${task.createdAt} | U: ${task.updatedAt}]`
+        )
+    }
 }
 
+/**
+ * Main function
+ */
 function main() {
     // Read file
     let tasks;
@@ -73,7 +144,9 @@ function main() {
         case 'delete':
             deleteTask(tasks, argv[3]);
             break;
-        case 'mark-todo' | 'mark-in-progress' | 'mark-done':
+        case 'mark-todo':
+        case 'mark-in-progress':
+        case 'mark-done':
             const newStatus = command.slice(5);
             markTask(tasks, argv[3], newStatus);
             break;
@@ -86,4 +159,5 @@ function main() {
     // Save to file
     writeFileSync(jsonPath, JSON.stringify(tasks));
 }
+
 main();
