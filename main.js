@@ -45,12 +45,10 @@ function addTask(tasks, description) {
  */
 function updateTask(tasks, id, description) {
     if (!id) {
-        throw Error(`You need to provide the ID of the task to update.
-            Usage: ${argv[1]} update <id> <description>`);
+        throw Error(`You need to provide the ID of the task to update.\nUsage: ${argv[1]} update <id> <description>`);
     }
     if (!description) {
-        throw Error(`You need to provide another short description when updating a task.
-            Usage: ${argv[1]} update <id> <description>`);
+        throw Error(`You need to provide another short description when updating a task.\nUsage: ${argv[1]} update <id> <description>`);
     }
 
     const task = tasks[id];
@@ -71,8 +69,7 @@ function updateTask(tasks, id, description) {
  */
 function deleteTask(tasks, id) {
     if (!id) {
-        throw Error(`You need to provide the ID of the task to delete.
-            Usage: ${argv[1]} delete <id>`);
+        throw Error(`You need to provide the ID of the task to delete.\nUsage: ${argv[1]} delete <id>`);
     }
 
     if (!tasks[id]) {
@@ -90,8 +87,7 @@ function deleteTask(tasks, id) {
  */
 function markTask(tasks, id, newStatus) {
     if (!id) {
-        throw Error(`You need the ID of the task to update its status
-            Usage: ${argv[1]} mark-${newStatus} <id>`);
+        throw Error(`You need the ID of the task to update its status\nUsage: ${argv[1]} mark-${newStatus} <id>`);
     }
 
     const task = tasks[id];
@@ -111,9 +107,9 @@ function markTask(tasks, id, newStatus) {
  */
 function listTasks(tasks, status) {
     for (let task of Object.values(tasks)) {
-        console.log(
-            `${task.id}: ${task.description} [${task.status}]\n[C: ${task.createdAt} | U: ${task.updatedAt}]`
-        )
+        if (!status || task.status == status) {
+            console.log(`${task.id}: ${task.description} [${task.status}]\n[C: ${task.createdAt} | U: ${task.updatedAt}]`)
+        }
     }
 }
 
@@ -134,30 +130,34 @@ function main() {
 
     // Execute command
     const command = argv[2];
-    switch (command) {
-        case 'add':
-            addTask(tasks, argv[3]);
-            break;
-        case 'update':
-            updateTask(tasks, argv[3], argv[4]);
-            break;
-        case 'delete':
-            deleteTask(tasks, argv[3]);
-            break;
-        case 'mark-todo':
-        case 'mark-in-progress':
-        case 'mark-done':
-            const newStatus = command.slice(5);
-            markTask(tasks, argv[3], newStatus);
-            break;
-        case 'list':
-            const statusFilter = argv[3];
-            listTasks(tasks, statusFilter);
-            break;
-    }
+    try {
+        switch (command) {
+            case 'add':
+                addTask(tasks, argv[3]);
+                break;
+            case 'update':
+                updateTask(tasks, argv[3], argv[4]);
+                break;
+            case 'delete':
+                deleteTask(tasks, argv[3]);
+                break;
+            case 'mark-todo':
+            case 'mark-in-progress':
+            case 'mark-done':
+                const newStatus = command.slice(5);
+                markTask(tasks, argv[3], newStatus);
+                break;
+            case 'list':
+                const statusFilter = argv[3];
+                listTasks(tasks, statusFilter);
+                break;
+        }
 
-    // Save to file
-    writeFileSync(jsonPath, JSON.stringify(tasks));
+        // Save to file
+        writeFileSync(jsonPath, JSON.stringify(tasks));
+    } catch (error) {
+        console.error(error.message);
+    }
 }
 
 main();

@@ -4,8 +4,8 @@
   "description": "CLI task tracker",
   "main": "main.js",
   "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "bin": {
+    "task-cli": "./main.js"
   },
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "backend"
   ],
   "author": "JamesPagani",
-  "license": "Unlicense",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/JamesPagani/task-tracker/issues"
   },
