@@ -2,7 +2,7 @@
 "use strict"
 
 import { argv, exit } from 'node:process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, stat, writeFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto';
 
 // CONSTANTS
@@ -32,9 +32,15 @@ function addTask(tasks, description) {
         id: newId,
         description: description,
         status: "todo",
-        createdAt: taskDate,
-        updatedAt: taskDate
+        createdAt: taskDate.toLocaleString(undefined, {
+            hour12: false        
+        }),
+        updatedAt: taskDate.toLocaleString(undefined, {
+            hour12: false        
+        })
     }
+
+    console.log(`Task ${newId} - ${description} has been succesfully created!`);
 }
 
 /**
@@ -59,7 +65,11 @@ function updateTask(tasks, id, description) {
 
     const updateDate = new Date();
     task.description = description;
-    task.updatedAt = updateDate;
+    task.updatedAt = updateDate.toLocaleString(undefined, {
+        hour12: false        
+    });
+
+    console.log(`Task ${task.id} updated successfuly! (New description: ${description})`);
 }
 
 /**
@@ -75,15 +85,16 @@ function deleteTask(tasks, id) {
     if (!tasks[id]) {
         throw Error(`Task ${id} was not found.`);
     }
-    
+    const oldDescription = tasks[id].description;
     delete tasks[id];
+    console.log(`Task ${id} - ${oldDescription} has been deleted.`);
 }
 
 /**
  * Update the status of a task
  * @param {object} tasks The list of tasks
  * @param {string} id The ID of the task to update its status
- * @param {string} newStatus The new status of the task (todo, in-progress, or done)
+ * @param {("todo"|"in-progress"|"done")} newStatus The new status of the task (todo, in-progress, or done)
  */
 function markTask(tasks, id, newStatus) {
     if (!id) {
@@ -97,19 +108,61 @@ function markTask(tasks, id, newStatus) {
 
     const updateDate = new Date();
     task.status = newStatus;
-    task.updatedAt = updateDate;
+    task.updatedAt = updateDate.toLocaleString(undefined, {
+        hour12: false        
+    });
+    console.log(`Task ${id} - ${task.description} is now marked as ${newStatus == "todo" ? "to do" : newStatus == "in-progress" ? "in progress" : "done"}`);
 }
 
 /**
  * 
  * @param {object} tasks The list of tasks
- * @param {string} status If specified, show all tasks with this status
+ * @param {("todo"|"in-progress"|"done")} status If specified, show all tasks with this status
  */
 function listTasks(tasks, status) {
+    const todoTasks = [];
+    const inProgressTasks = [];
+    const doneTasks = [];
     for (let task of Object.values(tasks)) {
-        if (!status || task.status == status) {
-            console.log(`${task.id}: ${task.description} [${task.status}]\n[C: ${task.createdAt} | U: ${task.updatedAt}]`)
+        switch (task.status) {
+            case "todo":
+                todoTasks.push(task);
+                break;
+            case "in-progress":
+                inProgressTasks.push(task);
+                break;
+            case "done":
+                doneTasks.push(task);
+                break;
         }
+    }
+
+    if (todoTasks.length > 0 && (!status || status == "todo")) {
+        if (!status) {
+            console.log("TO DO\n");
+        }
+        todoTasks.forEach((task) => {
+            console.log(`${task.id} - ${task.description}\nCREATED AT: ${task.createdAt}\nUPDATAED AT: ${task.updatedAt}\n`);
+        })
+        console.log("------------------------------");
+    }
+    if (inProgressTasks.length > 0 && (!status || status == "in-progress")) {
+        if (!status) {
+            console.log("IN PROGRESS\n");
+        }
+        inProgressTasks.forEach((task) => {
+            console.log(`${task.id} - ${task.description}\nCREATED AT: ${task.createdAt}\nUPDATAED AT: ${task.updatedAt}\n`);
+        })
+        console.log("------------------------------");
+    }
+    if (doneTasks.length > 0 && (!status || status == "done")) {
+        if (!status) {
+            console.log("DONE\n");
+        }
+        doneTasks.forEach((task) => {
+            console.log(`${task.id} - ${task.description}\nCREATED AT: ${task.createdAt}\nUPDATAED AT: ${task.updatedAt}\n`);
+        })
+        console.log("------------------------------");
     }
 }
 
