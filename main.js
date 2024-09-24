@@ -2,7 +2,7 @@
 "use strict"
 
 import { argv, exit } from 'node:process';
-import { existsSync, readFileSync, stat, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto';
 
 // CONSTANTS
@@ -16,8 +16,7 @@ const jsonPath = new URL('./task-tracker.json', import.meta.url);
  */
 function addTask(tasks, description) {
     if (!description) {
-        throw Error(`A short description is required when creating a task.
-            Usage: ${argv[1]} add <description>`);
+        throw Error(`A short description is required when creating a task.\nUSAGE: task-cli add <description>`);
     }
 
     const taskDate = new Date();
@@ -51,16 +50,16 @@ function addTask(tasks, description) {
  */
 function updateTask(tasks, id, description) {
     if (!id) {
-        throw Error(`You need to provide the ID of the task to update.\nUsage: ${argv[1]} update <id> <description>`);
+        throw Error(`You need to provide the ID of the task to update.\nUSAGE: task-cli update <id> <description>`);
     }
     if (!description) {
-        throw Error(`You need to provide another short description when updating a task.\nUsage: ${argv[1]} update <id> <description>`);
+        throw Error(`You need to provide another short description when updating a task.\nUSAGE: task-cli update <id> <description>`);
     }
 
     const task = tasks[id];
 
     if (!task) {
-        throw Error(`Task ${id} was not found.`);
+        throw Error(`Task ${id} was not found. If you forgot the ID of the task, use task-cli list to view all tasks.`);
     }
 
     const updateDate = new Date();
@@ -79,11 +78,11 @@ function updateTask(tasks, id, description) {
  */
 function deleteTask(tasks, id) {
     if (!id) {
-        throw Error(`You need to provide the ID of the task to delete.\nUsage: ${argv[1]} delete <id>`);
+        throw Error(`You need to provide the ID of the task to delete.\nUSAGE: task-cli delete <id>`);
     }
 
     if (!tasks[id]) {
-        throw Error(`Task ${id} was not found.`);
+        throw Error(`Task ${id} was not found. If you forgot the ID of the task, use task-cli list to view all tasks.`);
     }
     const oldDescription = tasks[id].description;
     delete tasks[id];
@@ -98,12 +97,12 @@ function deleteTask(tasks, id) {
  */
 function markTask(tasks, id, newStatus) {
     if (!id) {
-        throw Error(`You need the ID of the task to update its status\nUsage: ${argv[1]} mark-${newStatus} <id>`);
+        throw Error(`You need the ID of the task to update its status\nUSAGE: task-cli mark-${newStatus} <id>`);
     }
 
     const task = tasks[id];
     if (!task) {
-        throw Error(`Task ${id} was not found.`);
+        throw Error(`Task ${id} was not found. If you forgot the ID of the task, use task-cli list to view all tasks.`);
     }
 
     const updateDate = new Date();
@@ -167,6 +166,24 @@ function listTasks(tasks, status) {
 }
 
 /**
+ * Show the commands and how to use them
+ */
+function showHelp() {
+    console.log(`USAGE: task-cli <command> <arg1> <arg2>`);
+    console.log(`\nCommands:`);
+    console.log(`- add <description>: Add a new task with a short description`);
+    console.log(`- update <id> <description>: Update the description of a task`);
+    console.log(`- delete <id>: Delete a task\n`);
+    console.log(`- mark-todo <id>: Mark a task as "todo"`);
+    console.log(`- mark-in-progress <id>: Mark a task as "in-progress"`);
+    console.log(`- mark-done <id>: Mark a task as "done"\n`);
+    console.log(`- list: List all tasks`);
+    console.log(`- list todo: Lists all tasks with status "todo"`);
+    console.log(`- list in-progress: Lists all tasks with status "in-progress"`);
+    console.log(`- list done: Lists all tasks with status "done"`);
+}
+
+/**
  * Main function
  */
 function main() {
@@ -204,12 +221,18 @@ function main() {
                 const statusFilter = argv[3];
                 listTasks(tasks, statusFilter);
                 break;
+            case 'help':
+                showHelp();
+                break;
+            default:
+                throw Error(`Invalid command. Use "task-cli help" to view the commands available.`)
         }
 
         // Save to file
         writeFileSync(jsonPath, JSON.stringify(tasks));
     } catch (error) {
         console.error(error.message);
+        exit(1);
     }
 }
 
