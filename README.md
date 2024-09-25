@@ -27,4 +27,6 @@ task-cli delete <id>: Delete a task
 task-cli mark-todo <id>: Mark a task as todo
 task-cli mark-in-progress <id>: Mark a task as in-progress
 task-cli mark-done <id>: Mark a task as done
+
+task-cli list [todo | in-progress | done]: List all tasks. You can pass the status to only show the tasks with that status.
 ```
