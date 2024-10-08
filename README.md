@@ -1,6 +1,6 @@
 # Task Tracker CLI
 
-*[This project is part of the many Backend projects available at Roadmap.sh](https://roadmap.sh/backend/projects)*
+*[This project is part of the many Backend projects available at Roadmap.sh](https://roadmap.sh/projects/task-tracker)*
 Create and manage your tasks with your terminal!
 
 ## Installation
